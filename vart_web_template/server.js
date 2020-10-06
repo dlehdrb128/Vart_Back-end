@@ -1,38 +1,26 @@
 const express = require("express");
-const app = express();
-var bodyParser = require("body-parser");
 const path = require("path");
-const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 
-require("dotenv").config();
+const connect = require("./schemas");
+const apiRouter = require("./routers/apiRouter");
 
-const port = process.env.PORT || 8800;
+const app = express();
+dotenv.config();
+
+app.set("port", process.env.PORT || 3001);
 
 app.set("view", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
+connect();
+
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-mongoose
-  .connect(
-    "",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
-    }
-  )
-  .then(() => console.log("db 접속 성공"))
-  .catch((err) => console.log(err));
+app.use("/", apiRouter);
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
-var mainPageRouter = require("./router/mainPage");
-
-app.use("/", mainPageRouter);
-
-app.listen(port, function () {
-  console.log(`server on! http://localhost${port}`);
+app.listen(app.get("port"), function () {
+  console.log(app.get("port"), "번 포트에서 대기 중");
 });
