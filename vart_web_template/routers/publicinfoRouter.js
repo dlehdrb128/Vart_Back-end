@@ -1,20 +1,22 @@
 const router = require("express").Router();
-const transaction = require("transaction");
+const transaction = require("./transaction");
 
 //한명 조회
 router.get("/query/:infoKey", async (req, res) => {
   const { infoKey } = req.params;
   console.log(infoKey);
 
-  var data = {
+  let data = {
     function: "readPublicinfo",
     infoKey: infoKey,
+    
   };
 
-  var result = await transaction(data);
-
-  console.log(result);
-  res.json(result);
+  let result = await transaction(data);
+  const show = result.toString('utf-8') // string(JSON)
+  const realresult = JSON.parse(show) // object
+   res.json(realresult); 
+ 
 });
 
 //전체 조회
@@ -23,14 +25,16 @@ router.get("/queryAll", async (req, res) => {
     function: "readAllPublicinfo",
   };
 
-  var result = await transaction(data);
 
-  console.log(result);
-  res.json(result);
+  let result = await transaction(data); // buffer
+  const show = result.toString('utf-8') // string(JSON)
+  const realresult = JSON.parse(show) // object
+   res.json(realresult); 
 });
 
 //공시 정보 입력
 router.post("/invoke", async (req, res) => {
+  
   var data = {
     function: "addPublicinfo",
     infoKey: req.body.infoKey,

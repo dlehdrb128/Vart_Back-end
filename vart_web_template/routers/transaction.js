@@ -8,6 +8,7 @@ const { FileSystemWallet, Gateway } = require("fabric-network");
 const fs = require("fs");
 const path = require("path");
 
+
 const ccpPath = path.resolve(__dirname, "../../network/connection.json");
 const ccpJSON = fs.readFileSync(ccpPath, "utf8");
 const ccp = JSON.parse(ccpJSON);
@@ -42,10 +43,11 @@ async function transaction(data) {
 
     // Get the contract from the network.
     const contract = network.getContract("vart");
-
+     let result;
+     console.log(data)
     switch (data.function) {
       case "readPublicinfo":
-        const result = await contract.evaluateTransaction(
+         result = await contract.evaluateTransaction(
           data.function,
           data.infoKey
         );
@@ -74,7 +76,10 @@ async function transaction(data) {
         await gateway.disconnect();
         break;
       case "readAllPublicinfo":
-        const result = await contract.evaluateTransaction(data.function);
+        console.log(data.function)
+        console.log("AA")
+         result = await contract.evaluateTransaction(data.function);
+         console.log(result)
         return result;
       case "updatePublicinfo":
         await contract.submitTransaction(
@@ -103,4 +108,4 @@ async function transaction(data) {
   }
 }
 
-module.exports = transaction();
+module.exports = transaction;

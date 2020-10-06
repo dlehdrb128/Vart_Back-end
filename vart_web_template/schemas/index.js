@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+
 
 const connect = () => {
   mongoose.set("debug", true);
 
   mongoose.connect(
-    process.env.mongoose,
+    process.env.MONGO_URL,
     {
       useNewUrlParser: true,
       useCreateIndex: true,
