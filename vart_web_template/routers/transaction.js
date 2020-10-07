@@ -43,7 +43,8 @@ async function transaction(data) {
 
     // Get the contract from the network.
     const contract = network.getContract("vart");
-
+     let result
+     let readData
     console.log(data)
     switch (data.function) {
       case "readPublicinfo":
@@ -52,7 +53,7 @@ async function transaction(data) {
           data.infoKey
         );
 
-        let result = {
+         result = {
           result : true,
           data: readData
         }
@@ -61,7 +62,7 @@ async function transaction(data) {
       case "initLedgerPubilcinfo":
         await contract.submitTransaction(data.function);
         await gateway.disconnect();
-        let result = {
+         result = {
           result : true
         }
         return result
@@ -85,7 +86,7 @@ async function transaction(data) {
         );
         await gateway.disconnect();
         
-        let result = {
+         result = {
           result : true
         }
 
@@ -96,7 +97,7 @@ async function transaction(data) {
         readData = await contract.evaluateTransaction(data.function);
         console.log(readData)
          
-        let result = {
+         result = {
           result : true,
           data : readData
         } 
@@ -121,12 +122,12 @@ async function transaction(data) {
         );
         await gateway.disconnect();
 
-        let result = {
+         result = {
           result : true
         } 
         return result
       default:
-       let result = {
+        result = {
          result : false,
          data : "함수를 찾을 수 없습니다."
        } 
@@ -135,7 +136,7 @@ async function transaction(data) {
   } catch (error) {
     console.error(`Failed to submit transaction: ${error}`);
 
-    var result = {
+     result = {
       result : false,
       data : error
     }

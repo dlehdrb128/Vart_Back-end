@@ -9,9 +9,25 @@ router.get("/join/:userId", (req, res) => {
   res.send("sign");
 });
 //로그인 조회
-router.get("/login", (req, res) => {
-  res.send("login");
-});
+router.get("/login",function ( req, res) {
+  var query={
+  name: req.body.name,
+  email: req.body.email
+  }
+  User.findOne(query, function(err,user){
+  if(!user){
+  res.status(500).send("아이디 혹은 이메일 오류");
+  }else{
+  bcrypt.compare(req.body.password , user.password , function(err,result){
+  if(result){
+  res.status(200).send("Login is Success");
+  }else {
+  res.status(500).send("Password Error");
+         }
+        })
+      }   
+    })
+  });
 //로그아웃 조회
 router.get("/logout", (req, res) => {
   res.send("logout");
