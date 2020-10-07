@@ -9,14 +9,18 @@ router.get("/query/:infoKey", async (req, res) => {
   let data = {
     function: "readPublicinfo",
     infoKey: infoKey,
-    
   };
 
   let result = await transaction(data);
-  const show = result.toString('utf-8') // string(JSON)
-  const realresult = JSON.parse(show) // object
-   res.json(realresult); 
- 
+
+  if(result.result) {
+    const show = result.data.toString('utf-8') // string(JSON)
+    const realresult = JSON.parse(show) // object
+    res.json(realresult);
+  } else {
+    console.log(`Error : ${result.data}`)
+    res.status(401).json(JSON.parse(result.data))
+  } 
 });
 
 //전체 조회
@@ -25,11 +29,15 @@ router.get("/queryAll", async (req, res) => {
     function: "readAllPublicinfo",
   };
 
-
   let result = await transaction(data); // buffer
-  const show = result.toString('utf-8') // string(JSON)
-  const realresult = JSON.parse(show) // object
-   res.json(realresult); 
+  if(result.result) {
+    const show = result.data.toString('utf-8') // string(JSON)
+    const realresult = JSON.parse(show) // object
+    res.json(realresult); 
+  } else {
+    console.log(`Error : ${result.data}`)
+    res.status(401).json(JSON.parse(result.data))
+  }
 });
 
 //공시 정보 입력
@@ -60,9 +68,14 @@ router.post("/invoke", async (req, res) => {
     },
   };
 
-  await transaction(data);
+  const result = await transaction(data);
 
-  res.sendStatus(200);
+  if(result.result) {
+    res.status(200).send('성공')
+  } else {
+    console.log(reulst.data)
+    res.status(401).json(JSON.parse(result.data))
+  }
 });
 
 //공시 정보 업데이트
@@ -90,10 +103,17 @@ router.post("/update", async (req, res) => {
       education: req.body.developerleaders.education,
       experience: req.body.developerleaders.experience,
     },
-  };
-  await transaction(data);
+  }
+  const result = await transaction(data);
 
-  res.sendStatus(200);
+  if(result.result) {
+    res.status(200).send('성공')
+  } else {
+    console.log(reulst.data)
+    res.status(401).json(JSON.parse(result.data))
+  }
 });
 
 module.exports = router;
+
+

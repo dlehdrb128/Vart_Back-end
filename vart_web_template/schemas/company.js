@@ -14,7 +14,7 @@ const companySchema = new Schema({
     type: Number,
     required: true,
   },
-  companyNum: {
+  businessnum: {
     type: Number,
     required: true,
     unique: true,

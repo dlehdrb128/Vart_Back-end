@@ -43,19 +43,29 @@ async function transaction(data) {
 
     // Get the contract from the network.
     const contract = network.getContract("vart");
-     let result;
-     console.log(data)
+
+    console.log(data)
     switch (data.function) {
       case "readPublicinfo":
-         result = await contract.evaluateTransaction(
+         readData = await contract.evaluateTransaction(
           data.function,
           data.infoKey
         );
+
+        let result = {
+          result : true,
+          data: readData
+        }
+      
         return result;
       case "initLedgerPubilcinfo":
         await contract.submitTransaction(data.function);
         await gateway.disconnect();
-        break;
+        let result = {
+          result : true
+        }
+        return result
+
       case "addPublicinfo":
         await contract.submitTransaction(
           data.function,
@@ -74,12 +84,23 @@ async function transaction(data) {
           data.developerleaders.experience
         );
         await gateway.disconnect();
-        break;
+        
+        let result = {
+          result : true
+        }
+
+        return result;
       case "readAllPublicinfo":
         console.log(data.function)
         console.log("AA")
-         result = await contract.evaluateTransaction(data.function);
-         console.log(result)
+        readData = await contract.evaluateTransaction(data.function);
+        console.log(readData)
+         
+        let result = {
+          result : true,
+          data : readData
+        } 
+
         return result;
       case "updatePublicinfo":
         await contract.submitTransaction(
@@ -99,12 +120,27 @@ async function transaction(data) {
           data.developerleaders.experience
         );
         await gateway.disconnect();
-        break;
+
+        let result = {
+          result : true
+        } 
+        return result
       default:
+       let result = {
+         result : false,
+         data : "함수를 찾을 수 없습니다."
+       } 
+       return result
     }
   } catch (error) {
     console.error(`Failed to submit transaction: ${error}`);
-    process.exit(1);
+
+    var result = {
+      result : false,
+      data : error
+    }
+
+    return result
   }
 }
 
