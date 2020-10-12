@@ -25,21 +25,52 @@ const userSchema = new Schema({
   },
 });
 userSchema.pre('save', function (next) {     //save 하기 전에 Schema 
- let user = this
+  let user = this
   if (user.isModified("password")) {
-    bcrypt.genSalt(saltRounds,function(err,salt){
-     if(err) return next(err);
-     bcrypt.hash(user.password, salt, function(err, hash) {
-       if (err) return next(err);
-       user.password = hash;
-       next();
+    bcrypt.genSalt(saltRounds, function (err, salt) {
+      if (err) return next(err);
+      bcrypt.hash(user.password, salt, function (err, hash) {
+        if (err) return next(err);
+        user.password = hash;
+        next();
       });
-    })  
+    })
   } else {
     next();
   }
 });
 
+
+userSchema.methods.comparePassword = function (inputPassword, cb) {
+  const isValid = bcrypt.compareSync(inputPassword, this.password);
+
+  if (isValid) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+    // cb('error');
+  }
+};
+
+// console.log(userSchema)
+
+// var query = {
+//   name: req.body.name,
+//   email: req.body.email
+// }
+// User.findOne(query, function (err, user) {
+//   if (!user) {
+//     res.status(500).send("아이디 혹은 이메일 오류");
+//   } else {
+//     bcrypt.compare(req.body.password, user.password, function (err, result) {
+//       if (result) {
+//         res.status(200).send("Login is Success");
+//       } else {
+//         res.status(500).send("Password Error");
+//       }
+//     })
+//   }
+// })
 
 
 module.exports = mongoose.model("User", userSchema);

@@ -10,6 +10,7 @@ const connect = () => {
     {
       useNewUrlParser: true,
       useCreateIndex: true,
+      useUnifiedTopology: true
     },
     (error) => {
       if (error) {
