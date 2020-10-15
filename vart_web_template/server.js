@@ -18,11 +18,12 @@ app.set("port", process.env.PORT || 3001);
 
 connect();
 
+
 app.use(session({
   secret: 'keyboard cat',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: true }
+  cookie: { secure: false }
 }))
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());

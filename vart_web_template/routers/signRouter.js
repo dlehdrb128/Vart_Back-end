@@ -3,43 +3,6 @@ const router = express.Router();
 const User = require("../schemas/user");
 const passport = require('passport')
 
-
-
-
-
-
-//회원가입 조회
-router.get("/join/:userId", (req, res) => {
-  const { userId } = req.params;
-  console.log(userId);
-  res.send("sign");
-});
-//로그인 조회
-router.get("/login", function (req, res) {
-  var query = {
-    name: req.body.name,
-    email: req.body.email
-  }
-  User.findOne(query, function (err, user) {
-    if (!user) {
-      res.status(500).send("아이디 혹은 이메일 오류");
-    } else {
-
-      // 
-      bcrypt.compare(req.body.password, user.password, function (err, result) {
-        if (result) {
-          res.status(200).send("Login is Success");
-        } else {
-          res.status(500).send("Password Error");
-        }
-      })
-    }
-  })
-});
-//로그아웃 조회
-router.get("/logout", (req, res) => {
-  res.send("logout");
-});
 //회원가입
 router.post("/join", (req, res) => {
   const userdata = req.body;
@@ -56,15 +19,67 @@ router.post("/join", (req, res) => {
   });
 });
 
-router.post('/login', passport.authenticate('local', {
-  failureRedirect: '/'
+function loginRequired(req, res, next){
+  if(req.user){
+    next()
+  }
+  else{
+    res.status(401)
+    res.json({message:'error'})
+  }
+}
+// router.use(loginRequired)
+
+//마이페이지 유저 찾기 
+router.get("/join", loginRequired, (req, res) => {
+  // console.log(req.session)
+  console.log(req.user)
+  res.json({message:'success'})
+
+  // const { userId } = req.params;
+  // res.json({message:user})
+})
+// //로그인 조회
+// router.get("/login", function (req, res) {
+//   var query = {
+//     name: req.body.name,
+//     email: req.body.email
+//   }
+//   User.findOne(query, function (err, user) {
+//     if (!user) {
+//       res.status(500).send("아이디 혹은 이메일 오류");
+//     } else {
+
+//       // 
+//       bcrypt.compare(req.body.password, user.password, function (err, result) {
+//         if (result) {
+//           res.status(200).send("Login is Success");
+//         } else {
+//           res.status(500).send("Password Error");
+//         }
+//       })
+//     }
+//   })
+// });
+//로그아웃 
+router.get("/logout", (req, res) => {
+  req.logout()
+  res.status(200).json({message: '로그아웃'})
+});
+
+
+router.get('/login', passport.authenticate('local', {
+ session:true
 }), (req, res) => {
   // user check 
-  console.log(req.user)
   // session
   // token을 client에 response.
   // - cookie or resp.body에 담아줄건지. 결정
-  res.redirect('/');
+  
+  
+  res.json({
+    message:'login Success'
+  })
 });
 
 

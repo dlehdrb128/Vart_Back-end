@@ -1,6 +1,5 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy;
-const jwt = require('express-jwt');
 const Users = require('./schemas/user')
 
 let passportfnc = function () {
@@ -10,7 +9,7 @@ let passportfnc = function () {
 
     passport.deserializeUser(function (id, done) {
         console.log("deserializeUser")
-        User.findById(id, function (err, user) {
+        Users.findById(id, function (err, user) {
             done(err, user);
         });
     });

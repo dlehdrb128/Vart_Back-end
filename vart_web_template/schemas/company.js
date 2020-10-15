@@ -14,11 +14,18 @@ const companySchema = new Schema({
     type: String,
     required: true,
   },
+  
+  //object key ref
   businessnum: {
     type: Number,
     required: true,
     unique: true,
   },
+  user:{
+    type: Schema.Types.ObjectId,
+    ref: 'Users'
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,

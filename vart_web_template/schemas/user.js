@@ -19,10 +19,18 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  businessnum: {
+    type: Number,
+    required: true,
+    unique: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now(),
   },
+  type:{
+    type: String, // company, personal
+  }
 });
 userSchema.pre('save', function (next) {     //save 하기 전에 Schema 
   let user = this
