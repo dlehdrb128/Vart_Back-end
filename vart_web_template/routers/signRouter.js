@@ -3,9 +3,11 @@ const router = express.Router();
 const User = require("../schemas/user");
 const passport = require('passport')
 
-//회원가입
-router.post("/join", (req, res) => {
+//유저 회원가입
+router.post("/join/person", (req, res) => {
   const userdata = req.body;
+  
+
   const user = new User(userdata);
   console.log(userdata);
 
@@ -18,6 +20,33 @@ router.post("/join", (req, res) => {
     }
   });
 });
+
+//company 회원가입
+router.post("/join/company", (req, res) => {
+  const userdata = req.body;
+  const {name, email, password, businessnum} = userdata
+
+  if (!businessnum){
+    res.status(400)
+    res.json({
+      message: "businessnum field required"
+    })
+  } else{
+    const user = new User({
+      ...userdata,
+      isActive: false
+  });
+
+  user.save((err) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send("Error sigup new user please try again");
+    } else {
+      res.status(200).send("Sign up is Success");
+    }
+  });
+}});
+
 
 function loginRequired(req, res, next){
   if(req.user){
@@ -71,6 +100,7 @@ router.get("/logout", (req, res) => {
 router.get('/login', passport.authenticate('local', {
  session:true
 }), (req, res) => {
+  req.login
   // user check 
   // session
   // token을 client에 response.
@@ -81,6 +111,15 @@ router.get('/login', passport.authenticate('local', {
     message:'login Success'
   })
 });
+
+router.post('/log',passport.authenticate('local'),(req,res)=>{
+  req.login(req.user,(err)=>{
+    if(err) {
+      res.json({message:'로그인 실패'})
+    }
+    res.json({message:'로그인 성공'})
+  })
+})
 
 
 module.exports = router;

@@ -8,7 +8,6 @@ let passportfnc = function () {
     });
 
     passport.deserializeUser(function (id, done) {
-        console.log("deserializeUser")
         Users.findById(id, function (err, user) {
             done(err, user);
         });

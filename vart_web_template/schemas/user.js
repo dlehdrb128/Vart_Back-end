@@ -21,7 +21,7 @@ const userSchema = new Schema({
   },
   businessnum: {
     type: Number,
-    required: true,
+    // required: true,
     unique: true,
   },
   createdAt: {
@@ -30,6 +30,10 @@ const userSchema = new Schema({
   },
   type:{
     type: String, // company, personal
+  },
+  isActive: {
+    type:Boolean,
+    default: true
   }
 });
 userSchema.pre('save', function (next) {     //save 하기 전에 Schema 
