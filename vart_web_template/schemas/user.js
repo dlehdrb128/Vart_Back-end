@@ -1,41 +1,44 @@
 const mongoose = require("mongoose");
 const bcrypt = require('bcrypt')
 const saltRounds = 10;
-
-
 const { Schema } = mongoose;
+
 const userSchema = new Schema({
   name: {
     type: String,
     required: true,
   },
+
   email: {
     type: String,
     trim: true,
     required: true,
-    unique: true,
   },
+
   password: {
     type: String,
     required: true,
   },
+
   businessnum: {
-    type: Number,
-    // required: true,
-    unique: true,
+    type: Number
   },
+
   createdAt: {
     type: Date,
     default: Date.now(),
   },
-  type:{
+
+  type: {
     type: String, // company, personal
   },
-  isActive: {
-    type:Boolean,
-    default: true
+
+  permission: {
+    type: String,
+    default: "User"
   }
 });
+
 userSchema.pre('save', function (next) {     //save 하기 전에 Schema 
   let user = this
   if (user.isModified("password")) {
@@ -52,6 +55,14 @@ userSchema.pre('save', function (next) {     //save 하기 전에 Schema
   }
 });
 
+userSchema.pre('updateOne', function () {
+  if (this._update.$set) {
+    if (this._update.$set.password) {
+      const hashedPassword = bcrypt.hashSync(this._update.$set.password, 10)
+      this._update.$set.password = hashedPassword
+    }
+  }
+})
 
 userSchema.methods.comparePassword = function (inputPassword, cb) {
   const isValid = bcrypt.compareSync(inputPassword, this.password);
@@ -60,29 +71,7 @@ userSchema.methods.comparePassword = function (inputPassword, cb) {
     cb(null, true);
   } else {
     cb(null, false);
-    // cb('error');
   }
 };
-
-// console.log(userSchema)
-
-// var query = {
-//   name: req.body.name,
-//   email: req.body.email
-// }
-// User.findOne(query, function (err, user) {
-//   if (!user) {
-//     res.status(500).send("아이디 혹은 이메일 오류");
-//   } else {
-//     bcrypt.compare(req.body.password, user.password, function (err, result) {
-//       if (result) {
-//         res.status(200).send("Login is Success");
-//       } else {
-//         res.status(500).send("Password Error");
-//       }
-//     })
-//   }
-// })
-
 
 module.exports = mongoose.model("User", userSchema);

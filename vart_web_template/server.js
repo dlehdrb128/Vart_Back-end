@@ -9,15 +9,14 @@ const connect = require("./schemas");
 const apiRouter = require("./routers/apiRouter");
 
 const app = express();
-dotenv.config();
 
+dotenv.config();
 
 app.set('trust proxy', 1)
 app.set("port", process.env.PORT || 3001);
 
-
+// MongoDB Connection
 connect();
-
 
 app.use(session({
   secret: 'keyboard cat',
@@ -25,6 +24,7 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false }
 }))
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 
@@ -32,11 +32,8 @@ app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
 
+passportConfig(passport)
 
-passportConfig()
-
-
-// app.use(passport.authenticate());
 app.use(express.urlencoded({ extended: false }));
 app.use("/", apiRouter);
 

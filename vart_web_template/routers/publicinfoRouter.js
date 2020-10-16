@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const transaction = require("./transaction");
 
-//한명 조회
+//조회
 router.get("/query/:infoKey", async (req, res) => {
   const { infoKey } = req.params;
   console.log(infoKey);
@@ -13,14 +13,14 @@ router.get("/query/:infoKey", async (req, res) => {
 
   let result = await transaction(data);
 
-  if(result.result) {
+  if (result.result) {
     const show = result.data.toString('utf-8') // string(JSON)
     const realresult = JSON.parse(show) // object
     res.json(realresult);
   } else {
     console.log(`Error : ${result.data}`)
     res.status(401).json(JSON.parse(result.data))
-  } 
+  }
 });
 
 //전체 조회
@@ -30,19 +30,19 @@ router.get("/queryAll", async (req, res) => {
   };
 
   let result = await transaction(data); // buffer
-  if(result.result) {
+  if (result.result) {
     const show = result.data.toString('utf-8') // string(JSON)
     const realresult = JSON.parse(show) // object
-    res.json(realresult); 
+    res.json(realresult);
   } else {
     console.log(`Error : ${result.data}`)
     res.status(401).json(JSON.parse(result.data))
   }
 });
 
-//공시 정보 입력
+//공시 정보 입력(코인 이름, 코인 가격, 상장 여부 등등)
 router.post("/invoke", async (req, res) => {
-  
+
   var data = {
     function: "addPublicinfo",
     infoKey: req.body.infoKey,
@@ -70,7 +70,7 @@ router.post("/invoke", async (req, res) => {
 
   const result = await transaction(data);
 
-  if(result.result) {
+  if (result.result) {
     res.status(200).send('성공')
   } else {
     console.log(reulst.data)
@@ -106,7 +106,7 @@ router.post("/update", async (req, res) => {
   }
   const result = await transaction(data);
 
-  if(result.result) {
+  if (result.result) {
     res.status(200).send('성공')
   } else {
     console.log(reulst.data)
