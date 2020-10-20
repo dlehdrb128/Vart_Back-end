@@ -3,6 +3,7 @@ const path = require("path");
 const dotenv = require("dotenv");
 const passport = require("passport")
 const session = require('express-session')
+const cors = require('cors')
 
 const passportConfig = require("./passport")
 const connect = require("./schemas");
@@ -11,7 +12,10 @@ const apiRouter = require("./routers/apiRouter");
 const app = express();
 
 dotenv.config();
-
+app.use(cors({
+  origin: true,
+  credentials: true
+}))
 app.set('trust proxy', 1)
 app.set("port", process.env.PORT || 3001);
 
