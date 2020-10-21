@@ -47,7 +47,6 @@ router.post("/invoke", async (req, res) => {
     function: "addPublicinfo",
     infoKey: req.body.infoKey,
     basicinfo: {
-      companyname: req.body.basicinfo.companyname,
       establishment: req.body.basicinfo.establishment,
       location: req.body.basicinfo.location,
       statejurisdiction: req.body.basicinfo.statejurisdiction,
@@ -84,7 +83,6 @@ router.post("/update", async (req, res) => {
     function: "updatePublicinfo",
     infoKey: req.body.infoKey,
     basicinfo: {
-      companyname: req.body.basicinfo.companyname,
       establishment: req.body.basicinfo.establishment,
       location: req.body.basicinfo.location,
       statejurisdiction: req.body.basicinfo.statejurisdiction,

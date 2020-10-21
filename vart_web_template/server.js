@@ -17,7 +17,7 @@ app.use(cors({
   credentials: true
 }))
 app.set('trust proxy', 1)
-app.set("port", process.env.PORT || 3001);
+app.set("port", process.env.PORT || 3005);
 
 // MongoDB Connection
 connect();

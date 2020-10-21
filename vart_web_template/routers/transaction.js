@@ -43,27 +43,27 @@ async function transaction(data) {
 
     // Get the contract from the network.
     const contract = network.getContract("vart");
-     let result
-     let readData
+    let result
+    let readData
     console.log(data)
     switch (data.function) {
       case "readPublicinfo":
-         readData = await contract.evaluateTransaction(
+        readData = await contract.evaluateTransaction(
           data.function,
           data.infoKey
         );
 
-         result = {
-          result : true,
+        result = {
+          result: true,
           data: readData
         }
-      
+
         return result;
       case "initLedgerPubilcinfo":
         await contract.submitTransaction(data.function);
         await gateway.disconnect();
-         result = {
-          result : true
+        result = {
+          result: true
         }
         return result
 
@@ -71,7 +71,6 @@ async function transaction(data) {
         await contract.submitTransaction(
           data.function,
           data.infoKey,
-          data.basicinfo.companyname,
           data.basicinfo.establishment,
           data.basicinfo.location,
           data.basicinfo.statejurisdiction,
@@ -85,9 +84,9 @@ async function transaction(data) {
           data.developerleaders.experience
         );
         await gateway.disconnect();
-        
-         result = {
-          result : true
+
+        result = {
+          result: true
         }
 
         return result;
@@ -96,18 +95,17 @@ async function transaction(data) {
         console.log("AA")
         readData = await contract.evaluateTransaction(data.function);
         console.log(readData)
-         
-         result = {
-          result : true,
-          data : readData
-        } 
+
+        result = {
+          result: true,
+          data: readData
+        }
 
         return result;
       case "updatePublicinfo":
         await contract.submitTransaction(
           data.function,
           data.infoKey,
-          data.basicinfo.companyname,
           data.basicinfo.establishment,
           data.basicinfo.location,
           data.basicinfo.statejurisdiction,
@@ -122,23 +120,23 @@ async function transaction(data) {
         );
         await gateway.disconnect();
 
-         result = {
-          result : true
-        } 
+        result = {
+          result: true
+        }
         return result
       default:
         result = {
-         result : false,
-         data : "함수를 찾을 수 없습니다."
-       } 
-       return result
+          result: false,
+          data: "함수를 찾을 수 없습니다."
+        }
+        return result
     }
   } catch (error) {
     console.error(`Failed to submit transaction: ${error}`);
 
-     result = {
-      result : false,
-      data : error
+    result = {
+      result: false,
+      data: error
     }
 
     return result
