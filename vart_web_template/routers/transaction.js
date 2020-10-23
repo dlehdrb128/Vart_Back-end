@@ -3,17 +3,15 @@
  */
 
 "use strict";
-
 const { FileSystemWallet, Gateway } = require("fabric-network");
 const fs = require("fs");
 const path = require("path");
-
 
 const ccpPath = path.resolve(__dirname, "../../network/connection.json");
 const ccpJSON = fs.readFileSync(ccpPath, "utf8");
 const ccp = JSON.parse(ccpJSON);
 
-async function transaction(data) {
+const wallet = async () => {
   try {
     // Create a new file system based wallet for managing identities.
     const walletPath = path.join(process.cwd(), "wallet");
@@ -43,96 +41,11 @@ async function transaction(data) {
 
     // Get the contract from the network.
     const contract = network.getContract("vart");
-    let result
-    let readData
-    console.log(data)
-    switch (data.function) {
-      case "readPublicinfo":
-        readData = await contract.evaluateTransaction(
-          data.function,
-          data.infoKey
-        );
 
-        result = {
-          result: true,
-          data: readData
-        }
+    return contract
 
-        return result;
-      case "initLedgerPubilcinfo":
-        await contract.submitTransaction(data.function);
-        await gateway.disconnect();
-        result = {
-          result: true
-        }
-        return result
-
-      case "addPublicinfo":
-        await contract.submitTransaction(
-          data.function,
-          data.infoKey,
-          data.basicinfo.establishment,
-          data.basicinfo.location,
-          data.basicinfo.statejurisdiction,
-          data.tokenprofile.tokenname,
-          data.tokenprofile.projecttype,
-          data.executives.name,
-          data.executives.education,
-          data.executives.experience,
-          data.developerleaders.name,
-          data.developerleaders.education,
-          data.developerleaders.experience
-        );
-        await gateway.disconnect();
-
-        result = {
-          result: true
-        }
-
-        return result;
-      case "readAllPublicinfo":
-        console.log(data.function)
-        console.log("AA")
-        readData = await contract.evaluateTransaction(data.function);
-        console.log(readData)
-
-        result = {
-          result: true,
-          data: readData
-        }
-
-        return result;
-      case "updatePublicinfo":
-        await contract.submitTransaction(
-          data.function,
-          data.infoKey,
-          data.basicinfo.establishment,
-          data.basicinfo.location,
-          data.basicinfo.statejurisdiction,
-          data.tokenprofile.tokenname,
-          data.tokenprofile.projecttype,
-          data.executives.name,
-          data.executives.education,
-          data.executives.experience,
-          data.developerleaders.name,
-          data.developerleaders.education,
-          data.developerleaders.experience
-        );
-        await gateway.disconnect();
-
-        result = {
-          result: true
-        }
-        return result
-      default:
-        result = {
-          result: false,
-          data: "함수를 찾을 수 없습니다."
-        }
-        return result
-    }
   } catch (error) {
-    console.error(`Failed to submit transaction: ${error}`);
+    console.error(`Wallet Error: ${error}`);
 
     result = {
       result: false,
@@ -142,5 +55,94 @@ async function transaction(data) {
     return result
   }
 }
+var result
+const readPublicinfo = async (request) => {
+  let readData = await request.contract.evaluateTransaction(
+    request.function,
+    request.id,
+  );
 
-module.exports = transaction;
+  result = {
+    result: true,
+    data: readData
+  }
+
+  return result
+}
+
+
+const addPublicinfo = async (request) => {
+  try {
+    await request.contract.submitTransaction(
+      "addPublicinfo",
+      request.company.id,
+      request.company.name,
+      request.company.establishmentDate,
+      request.company.location,
+      request.company.jurisdiction,
+      request.company.token.name,
+      request.company.token.projectType,
+      request.company.executive.name,
+      request.company.executive.education,
+      request.company.executive.experience,
+      request.company.developerleader.name,
+      request.company.developerleader.education,
+      request.company.developerleader.experience
+    );
+
+    return true
+
+  } catch (error) {
+    console.error(`Failed to submit transaction: ${error}`)
+
+    return false
+  }
+}
+
+const readAllPublicinfo = async (request) => {
+  const readData = await request.contract.evaluateTransaction(request.function);
+
+  var result = {
+    result: true,
+    data: readData
+  }
+
+  return result
+}
+
+const updatePublicinfo = async (request) => {
+  try {
+    await request.contract.submitTransaction(
+      "updatePublicinfo",
+      request.company.id,
+      request.company.name,
+      request.company.establishmentDate,
+      request.company.location,
+      request.company.jurisdiction,
+      request.company.token.name,
+      request.company.token.projectType,
+      request.company.executive.name,
+      request.company.executive.education,
+      request.company.executive.experience,
+      request.company.developerleader.name,
+      request.company.developerleader.education,
+      request.company.developerleader.experience
+    );
+
+    return true
+
+  } catch (error) {
+    console.error(`Failed to submit transaction: ${error}`)
+
+    return false
+  }
+}
+
+
+module.exports = {
+  wallet,
+  addPublicinfo,
+  updatePublicinfo,
+  readPublicinfo,
+  readAllPublicinfo
+};

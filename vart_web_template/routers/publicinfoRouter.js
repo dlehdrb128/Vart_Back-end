@@ -1,17 +1,19 @@
 const router = require("express").Router();
-const transaction = require("./transaction");
-
+const transaction = require('./transaction')
+const Publicinfo = require('../schemas/publicinfo')
+const authenticate = require('../authenticate')
 //조회
 router.get("/query/:infoKey", async (req, res) => {
   const { infoKey } = req.params;
   console.log(infoKey);
 
   let data = {
+    contract: await transaction.wallet(),
     function: "readPublicinfo",
-    infoKey: infoKey,
+    id: infoKey,
   };
 
-  let result = await transaction(data);
+  let result = await transaction.readPublicinfo(data);
 
   if (result.result) {
     const show = result.data.toString('utf-8') // string(JSON)
@@ -26,10 +28,12 @@ router.get("/query/:infoKey", async (req, res) => {
 //전체 조회
 router.get("/queryAll", async (req, res) => {
   var data = {
+    contract: await transaction.wallet(),
     function: "readAllPublicinfo",
   };
 
-  let result = await transaction(data); // buffer
+  let result = await transaction.readAllPublicinfo(data); // buffer
+
   if (result.result) {
     const show = result.data.toString('utf-8') // string(JSON)
     const realresult = JSON.parse(show) // object
@@ -40,75 +44,50 @@ router.get("/queryAll", async (req, res) => {
   }
 });
 
+
+
 //공시 정보 입력(코인 이름, 코인 가격, 상장 여부 등등)
-router.post("/invoke", async (req, res) => {
+router.post("/invoke", authenticate.company, async (req, res) => {
+  req.body.company.id = `${Date.now()}_${req.body.company.token.name}`
 
-  var data = {
-    function: "addPublicinfo",
-    infoKey: req.body.infoKey,
-    basicinfo: {
-      establishment: req.body.basicinfo.establishment,
-      location: req.body.basicinfo.location,
-      statejurisdiction: req.body.basicinfo.statejurisdiction,
-    },
-    tokenprofile: {
-      tokenname: req.body.tokenprofile.tokenname,
-      projecttype: req.body.tokenprofile.projecttype,
-    },
-    executives: {
-      name: req.body.executives.name,
-      education: req.body.executives.education,
-      experience: req.body.executives.experience,
-    },
-    developerleaders: {
-      name: req.body.developerleaders.name,
-      education: req.body.developerleaders.education,
-      experience: req.body.developerleaders.experience,
-    },
-  };
-
-  const result = await transaction(data);
-
-  if (result.result) {
-    res.status(200).send('성공')
-  } else {
-    console.log(reulst.data)
-    res.status(401).json(JSON.parse(result.data))
+  const request = {
+    contract: await transaction.wallet(),
+    company: req.body.company
   }
-});
+
+  const result = await transaction.addPublicinfo(request);
+
+  if (result) {
+    const publicinfo = new Publicinfo(req.body.company)
+
+    publicinfo.save((err) => {
+      if (err) {
+        console.log(err)
+        res.status(500).json({ error: 'Internal error please try again' })
+      } else {
+        res.status(200).json({ message: 'Success' })
+      }
+    })
+  } else {
+    res.status(401).json({ error: "Failed to submit transaction" })
+  }
+})
 
 //공시 정보 업데이트
-router.post("/update", async (req, res) => {
-  var data = {
-    function: "updatePublicinfo",
-    infoKey: req.body.infoKey,
-    basicinfo: {
-      establishment: req.body.basicinfo.establishment,
-      location: req.body.basicinfo.location,
-      statejurisdiction: req.body.basicinfo.statejurisdiction,
-    },
-    tokenprofile: {
-      tokenname: req.body.tokenprofile.tokenname,
-      projecttype: req.body.tokenprofile.projecttype,
-    },
-    executives: {
-      name: req.body.executives.name,
-      education: req.body.executives.education,
-      experience: req.body.executives.experience,
-    },
-    developerleaders: {
-      name: req.body.developerleaders.name,
-      education: req.body.developerleaders.education,
-      experience: req.body.developerleaders.experience,
-    },
-  }
-  const result = await transaction(data);
+router.post("/update", authenticate.company, async (req, res) => {
 
-  if (result.result) {
+  const request = {
+    contract: await transaction.wallet(),
+    company: req.body.company
+  }
+
+  const result = await transaction.updatePublicinfo(request);
+
+  if (result) {
     res.status(200).send('성공')
   } else {
-    console.log(reulst.data)
-    res.status(401).json(JSON.parse(result.data))
+    console.log(reulst)
+    res.status(401).json(JSON.parse(result))
   }
 });
 

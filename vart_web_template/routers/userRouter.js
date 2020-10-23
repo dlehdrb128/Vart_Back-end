@@ -1,9 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require('passport')
-
 const User = require("../schemas/user");
-
 const authenticate = require('../authenticate')
 
 // 일반유저 회원가입
@@ -11,14 +9,23 @@ router.post("/person", (req, res) => {
   const userdata = req.body;
   const user = new User(userdata);
 
-  user.save((err) => {
+  User.findOne({ email: req.body.email }, (err, result) => {
     if (err) {
-      console.log(err);
-      res.status(500).send("Error sigup new user please try again");
+      console.log(err)
+      res.status(500).json({ message: "회원가입 성공" })
+    } else if (result) {
+      res.status(200).json({ message: "회원가입 실패" })
     } else {
-      res.status(200).send("Sign up is Success");
+      user.save((err) => {
+        if (err) {
+          console.log(err);
+          res.status(500).send("Error sigup new user please try again");
+        } else {
+          res.status(200).send("Sign up is Success");
+        }
+      });
     }
-  });
+  })
 });
 
 // 기업유저 회원가입(권한 필요)
@@ -31,6 +38,7 @@ router.post("/company", authenticate.signUp, (req, res) => {
   user.save((err) => {
     if (err) {
       console.log(err);
+
       res.status(500).send("Error sigup new user please try again");
     } else {
       res.status(200).send("Sign up is Success");
