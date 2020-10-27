@@ -5,9 +5,11 @@ const router = express.Router();
 const userRouter = require("./userRouter");
 // 공시 정보
 const publicinfoRouter = require("./publicinfoRouter");
+const disclosureRouter = require("./disclosureRouter")
 
 router.use("/user", userRouter);
 router.use("/publicinfo", publicinfoRouter);
+router.use("/disclosure", disclosureRouter);
 
 // 개발용(회사 숫자)
 const Company = require("../schemas/company")

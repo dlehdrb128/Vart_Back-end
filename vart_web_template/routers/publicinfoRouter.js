@@ -1,56 +1,13 @@
 const router = require("express").Router();
 const transaction = require('./transaction')
-const Publicinfo = require('../schemas/publicinfo')
 const authenticate = require('../authenticate')
-
-const selectProperties = (object, projection) => {
-  let isProjection = false
-
-  for (let value of Object.values(projection)) {
-    isProjection = isProjection | value
-  }
-
-
-  if (isProjection) {
-    for (let objKey of Object.keys(object)) {
-      let isKey = false
-
-      for (let [proKey, proValue] of Object.entries(projection)) {
-        if (objKey === proKey) {
-          if (proValue) {
-            isKey = true
-          } else {
-            delete object[objKey]
-          }
-        }
-      }
-
-      if (!isKey) {
-        delete object[objKey]
-      }
-    }
-  } else {
-    for (let objKey of Object.keys(object)) {
-      for (let [proKey, proValue] of Object.entries(projection)) {
-        if (objKey === proKey) {
-          if (!proValue) {
-            delete object[objKey]
-          }
-        }
-      }
-    }
-  }
-}
+const utils = require("./utils")
 
 //조회
-router.get("/query/:infoKey", async (req, res) => {
-  const { infoKey } = req.params;
-  console.log(infoKey);
-
+router.get("/query", async (req, res) => {
   let data = {
-    contract: await transaction.wallet(),
-    function: "readPublicinfo",
-    id: infoKey,
+    contract: await utils.wallet('vart'),
+    id: req.body.id,
   };
 
   let result = await transaction.readPublicinfo(data);
@@ -67,9 +24,9 @@ router.get("/query/:infoKey", async (req, res) => {
 
 //전체 조회
 router.get("/list", async (req, res) => {
+  console.log(utils);
   var data = {
-    contract: await transaction.wallet(),
-    function: "readAllPublicinfo",
+    contract: await utils.wallet('vart')
   };
 
   let result = await transaction.readAllPublicinfo(data); // buffer
@@ -79,16 +36,12 @@ router.get("/list", async (req, res) => {
     const realresult = JSON.parse(show) // object
 
     const projection = {
-
       Developerleader: 0,
       Executive: 0
-
-
     }
 
     for (let info of realresult) {
-      console.log(info)
-      await selectProperties(info, projection)
+      await utils.selectProperties(info, projection)
     }
 
     res.json(realresult);
@@ -104,7 +57,7 @@ router.post("/invoke", authenticate.company, async (req, res) => {
   req.body.company.id = `${Date.now()}_${req.body.company.token.name}`
 
   const request = {
-    contract: await transaction.wallet(),
+    contract: await utils.wallet('vart'),
     company: req.body.company
   }
 
@@ -130,7 +83,7 @@ router.post("/invoke", authenticate.company, async (req, res) => {
 router.post("/update", authenticate.company, async (req, res) => {
 
   const request = {
-    contract: await transaction.wallet(),
+    contract: await utils.wallet('vart'),
     company: req.body.company
   }
 
