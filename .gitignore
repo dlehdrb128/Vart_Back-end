@@ -1,2 +1,11 @@
-/vart_web_template/node_modules
-/vart_web_template/.env
+/node_modules
+/.env
+
+/hyperledger_fabric/network/config/*
+/hyperledger_fabric/network/crypto-config/*
+/hyperledger_fabric/network/org4-artifacts/crypto-config
+/hyperledger_fabric/network/docker-compose-ca.yaml
+/hyperledger_fabric/network/connection.yaml
+/hyperledger_fabric/network/explorer/connection-profile
+
+/hyperledger_fabric/application/wallet
