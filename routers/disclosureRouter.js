@@ -3,17 +3,50 @@ const authenticate = require('../authenticate')
 const utils = require("./utils")
 const disclosureinfotx = require("./disclosureinfotx")
 
+router.get('/query/token/:tokenName', async (req, res) => {
+    const data = {
+        contract: await utils.wallet('disclosure')
+    };
+
+    let result = await disclosureinfotx.readAllDisclosure(data); // buffer
+
+    if (result.result) {
+        const show = result.data.toString('utf-8') // string(JSON)
+        const _result = JSON.parse(show) // object
+
+        const realresult = _result.filter((publicInfo) => {
+            if (publicInfo.token === req.params.tokenName) {
+                return true
+            } else {
+                return false
+            }
+        })
+
+        const projection = {
+        }
+
+        for (let info of realresult) {
+            await utils.selectProperties(info, projection)
+        }
+
+        res.json(realresult);
+
+    } else {
+        console.log(`Error : ${result.data}`)
+        res.status(401).json(JSON.parse(result.data))
+    }
+})
+
 //조회
-router.get("/query", async (req, res) => {
-    console.log('공시 조회')
+router.get("/query/:id", async (req, res) => {
+    console.log('공시 상세 조회')
 
     let data = {
         contract: await utils.wallet('disclosure'),
-        no: req.body.no,
+        no: req.params.id
     };
 
     let result = await disclosureinfotx.readDisclosure(data);
-
     if (result.result) {
         const show = result.data.toString('utf-8') // string(JSON)
         const realresult = JSON.parse(show) // object
@@ -39,10 +72,6 @@ router.get("/list", async (req, res) => {
         const realresult = JSON.parse(show) // object
 
         const projection = {
-            no: 1,
-            reportTitle: 1,
-            date: 1
-
         }
 
         for (let info of realresult) {
@@ -58,7 +87,7 @@ router.get("/list", async (req, res) => {
 });
 
 //공시 정보 입력(코인 이름, 코인 가격, 상장 여부 등등)
-router.post("/invoke", async (req, res) => {
+router.post("/invoke", authenticate.company, async (req, res) => {
     console.log('공시정보입력')
     let request = {
         contract: await utils.wallet('disclosure')
@@ -72,10 +101,10 @@ router.post("/invoke", async (req, res) => {
 
         let max = 0;
         for (let info of realresult) {
-            max = info.no > max ? info.no : max
+            max = parseInt(info.no) > max ? parseInt(info.no) : max
         }
 
-        max++
+        max = max + 1
         req.body.no = max.toString()
 
         request = {
@@ -96,7 +125,7 @@ router.post("/invoke", async (req, res) => {
 })
 
 //공시 정보 업데이트
-router.post("/update", async (req, res) => {
+router.post("/update", authenticate.company, async (req, res) => {
     console.log('공시 정보')
     const request = {
         contract: await utils.wallet('disclosure'),

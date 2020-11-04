@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require('passport')
 const User = require("../schemas/user");
+const jwt = require('jsonwebtoken')
 const authenticate = require('../authenticate')
 
 // 일반유저 회원가입
@@ -12,9 +13,9 @@ router.post("/person", (req, res) => {
   User.findOne({ email: req.body.email }, (err, result) => {
     if (err) {
       console.log(err)
-      res.status(500).json({ message: "회원가입 성공" })
+      res.status(500).json({ message: "회원가입 실패" })
     } else if (result) {
-      res.status(200).json({ message: "회원가입 실패" })
+      res.status(200).json({ message: "회원가입 성공" })
     } else {
       user.save((err) => {
         if (err) {
@@ -47,14 +48,34 @@ router.post("/company", authenticate.signUp, (req, res) => {
 });
 
 // 로그인
-router.post("/login", passport.authenticate('local'), (req, res) => {
-  req.login(req.user, (err) => {
+router.post("/login", (req, res, next) => {
+  console.log('User SignIn...')
+
+  passport.authenticate('local', { session: false }, (err, user, info) => {
     if (err) {
       console.log(err)
-      res.status(500).send("Error sigup new user please try again");
+      return res.status(401).json(info)
     }
-    res.json({ message: 'login Success' })
-  })
+    if (!user) {
+      return res.status(401).json(info)
+    }
+
+    return req.login(user, (err) => {
+      if (err) {
+        console.log(err)
+        return next(err)
+      }
+      const SECRET_KEY = process.env.JWT_SECRET_KEY
+      const token = jwt.sign({
+        name: user.name,
+        email: user.email,
+        permission: user.permission
+      }, SECRET_KEY, {
+        expiresIn: '1h'
+      });
+      return res.status(201).json({ token, message: 'SignIn Success' })
+    })
+  })(req, res, next)
 });
 
 // 로그아웃 
@@ -109,5 +130,7 @@ router.post("/withdrawal", authenticate.user, (req, res) => {
     res.json({ message: "삭제 성공" })
   })
 })
-
+router.get("/info", authenticate.user, (req, res) => {
+  res.status(200).json({ user: req.user })
+})
 module.exports = router;

@@ -1,21 +1,19 @@
-const LocalStrategy = require('passport-local').Strategy;
+const passportJWT = require('passport-jwt');
+const LocalStrategy = require('passport-local').Strategy
+const JWTStrategy = passportJWT.Strategy;
+const ExtractJWT = passportJWT.ExtractJwt;
 const Users = require('./schemas/user')
 
-let passportfnc = function (passport) {
+const passportfnc = (passport) => {
     passport.serializeUser(function (user, done) {
-        const result = {
-            email: user.email,
-            permission: user.permission
-        }
-
-        done(null, result);
+        done(null, user);
     });
 
     passport.deserializeUser(function (user, done) {
         done(null, user);
     });
 
-    passport.use(new LocalStrategy({
+    passport.use('local', new LocalStrategy({
         usernameField: 'email',
         passwordField: 'password',
         session: true,
@@ -28,13 +26,22 @@ let passportfnc = function (passport) {
 
             return user.comparePassword(password, (passError, isMatch) => {
                 if (isMatch) {
-                    return done(null, user); // 검증 성공
+                    return done(null, user, null); // 검증 성공
+                } else {
+                    return done(null, false, { message: '비밀번호가 틀렸습니다' });
                 }
-                return done(null, false, { message: '비밀번호가 틀렸습니다' });
             })
         }
         )
     }))
 
+    passport.use('jwt', new JWTStrategy({ jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(), secretOrKey: process.env.JWT_SECRET_KEY }, (jwtPayload, done) => {
+        if (jwtPayload) {
+            done(null, jwtPayload)
+        } else {
+            done(null, false, { message: "The token does not exist." })
+        }
+    }));
 }
+
 module.exports = passportfnc

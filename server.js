@@ -16,7 +16,6 @@ app.use(cors({
   origin: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
-
 }))
 app.set('trust proxy', 1)
 app.set("port", process.env.PORT || 3005);

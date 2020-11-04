@@ -4,11 +4,11 @@ const authenticate = require('../authenticate')
 const utils = require("./utils")
 
 //조회
-router.get("/query", async (req, res) => {
+router.get("/query/:id", async (req, res) => {
   console.log('프로필 조회')
   let data = {
     contract: await utils.wallet('vart'),
-    id: req.body.id,
+    id: req.params.id,
   };
 
   let result = await publicinfotx.readPublicinfo(data);
@@ -16,7 +16,7 @@ router.get("/query", async (req, res) => {
   if (!result.result) {
     console.log(`Error : ${result.data}`)
     res.status(500).json(JSON.parse(result.data))
-  } else if (result.readData === undefined) {
+  } else if (result.data === undefined) {
     res.status(401).json({ message: "해당 프로필이 없습니다." });
   } else {
     const show = result.data.toString('utf-8') // string(JSON)
@@ -29,13 +29,13 @@ router.get("/query", async (req, res) => {
 //전체 조회
 router.get("/list", async (req, res) => {
   console.log('프로필 전체 조회')
-  console.log(utils);
+
   var data = {
     contract: await utils.wallet('vart')
   };
 
   let result = await publicinfotx.readAllPublicinfo(data); // buffer
-
+  console.log(result)
   if (result.result) {
     const show = result.data.toString('utf-8') // string(JSON)
     const realresult = JSON.parse(show) // object
@@ -58,18 +58,27 @@ router.get("/list", async (req, res) => {
 });
 
 //공시 정보 입력(코인 이름, 코인 가격, 상장 여부 등등)
-router.post("/invoke", async (req, res) => {
+router.post("/invoke", authenticate.company, async (req, res) => {
   console.log("프로필 정보 입력")
 
-  req.body.company.id = `${Date.now()}_${req.body.company.token.name}`
+  // req.body.company.id = `${Date.now()}_${req.body.company.token.name}`
 
+  // const request = {
+  //   contract: await utils.wallet('vart'),
+  //   company: req.body.company
+  // }
+  console.log(req.token)
+  const company = {
+    ...req.body,
+    id: `${Date.now()}_${req.body.token.name}`
+  }
   const request = {
     contract: await utils.wallet('vart'),
-    company: req.body.company
+    company: company
   }
 
-  const result = await publicinfotx.addPublicinfo(request);
 
+  const result = await publicinfotx.addPublicinfo(request);
   if (result) {
     res.status(200).json({ message: 'Success' })
   } else {
@@ -78,7 +87,7 @@ router.post("/invoke", async (req, res) => {
 })
 
 //공시 정보 업데이트
-router.post("/update", async (req, res) => {
+router.post("/update", authenticate.company, async (req, res) => {
   console.log("프로필 정보 업데이트")
 
   const request = {
