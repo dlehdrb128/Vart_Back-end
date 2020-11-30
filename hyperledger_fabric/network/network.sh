@@ -154,7 +154,8 @@ function replacePrivateKey() {
   PRIV_KEY=$(ls crypto-config/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp/keystore/ | grep _sk)
   sed -i "s/ORG3_ADMIN_PRIVATE_KEY/${PRIV_KEY}/g" connection.yaml
 
-  sed -i "s_HOME_${HOME}_g" connection.yaml
+  echo ${PWD}
+  sed -i "s|PWD|${PWD}|g" connection.yaml
 }
 
 function generateChannel() {

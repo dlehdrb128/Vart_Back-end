@@ -6,6 +6,8 @@ const Users = require('./schemas/user')
 
 const passportfnc = (passport) => {
     passport.serializeUser(function (user, done) {
+
+        
         done(null, user);
     });
 
